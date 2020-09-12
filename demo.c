@@ -4,6 +4,7 @@
 //宏定义
 #define uchar unsigned char 	   
 #define uint unsigned int
+#define ulint unsigned long int
 
 //DS1302寄存器的定义
 #define DS1302_second_write  0X80
@@ -28,6 +29,7 @@ sbit RTC_rst=P1^6;//CE引脚，读写时必须置高电平
 sbit RTC_io=P5^4;//数据引脚
 sbit sbtKey1 = P3^2; // 按键K1
 sbit sbtKey2 = P3^3; // 按键K2
+sbit sbtVib = P2 ^ 4;     //振动传感器
 //显示的位定义
 sbit led_sel=P2^3;
 uchar wei[]={0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07};	  //数码管位选
@@ -38,7 +40,16 @@ uint sbtKey1_state = 1; // K1消抖
 uint sbtKey2_state = 1; // K2消抖
 uint Led_Value = 8; // 数码管显示位数 8 ~ 44 4位一档 共9档
 uint Light_Level[] = {10, 20, 30, 40, 60, 80, 120, 160, 200}; // 不同光照强度阙值
-
+// 光照测试部分变量
+uint l=0;						//执行光的次数
+uint time_=0;				//延时
+ulint suml=0;				//光AD值得总和
+uint light=0;				//光
+// 双击亮屏
+uchar i_;
+uint tiptap = 0;
+uint Vib_flap = 0;
+uint ret = 0;
 //定义时间结构体
 typedef struct _systemtime_
 {
@@ -178,19 +189,35 @@ void init()
 	P0M1=0X00;
 
 	led_sel=0;//选通数码管
-	TMOD=0X01;//定时器0，工作方式1
+	TMOD=0X11;//定时器0，工作方式1
 	EA=1;//打开总中断
 	TH0=(65535-500)/256;//设置定时初值
 	TL0=(65535-500)%256;
 	TR0=1;//启动定时器
 	ET0=1;//开启定时器中断
 }
-
 void time0() interrupt 1
 {
 	TH0=(65535-500)/256;//设置定时初值
 	TL0=(65535-500)%256;
 	EA=0;
+	
+	EA=1;
+}
+void Delay500us()		//@11.0592MHz
+{
+	unsigned char i, j;
+
+	_nop_();
+	_nop_();
+	i = 6;
+	j = 93;
+	do
+	{
+		while (--j);
+	} while (--i);
+}
+void show_shumaguan() {
 	i++;
 	if(++sec==100) {sec=0; flag_100mS=1; }
 	if(i == Led_Value)
@@ -209,8 +236,26 @@ void time0() interrupt 1
 			case 7:P0=duan[t.second%10];break;
 			default :P0=0x40;break;
 		}
+	}else if (show_flag == 0 && tiptap == 1) {
+		ret += 1;
+		if (ret == 2000) {
+			ret = 0;
+			tiptap = 0;
+		}
+		i_ = i % 8;
+		P2=wei[i_];	
+		switch(i_)
+		{
+			case 0:P0=duan[t.hour/10];break;
+			case 1:P0=duan[t.hour%10];break;
+			case 3:P0=duan[t.minute/10];break;
+			case 4:P0=duan[t.minute%10];break;
+			case 6:P0=duan[t.second/10];break;
+			case 7:P0=duan[t.second%10];break;
+			default :P0=0x40;break;
+		}
 	}
-	EA=1;
+	Delay500us();
 }
 void Delay10ms()		//@11.0592MHz
 {
@@ -223,6 +268,8 @@ void Delay10ms()		//@11.0592MHz
 		while (--j);
 	} while (--i);
 }
+
+
 void main()
 {
 	init();
@@ -230,29 +277,28 @@ void main()
 	set_charge_DS1302();
 	while(1)
 	{
-		if (sbtKey1 == 0) {
-			if (sbtKey1_state == 0) {
-				Delay10ms();
-				if (sbtKey1 == 0) {
-					show_flag = ~show_flag;
-					sbtKey1_state = 1;
-				}
-			}
-		}else sbtKey1_state = 0;
-		if (sbtKey2 == 0) {
-			if (sbtKey2_state == 0) {
-				Delay10ms();
-				if (sbtKey2 == 0) {
-					Led_Value += 4;
-					sbtKey2_state = 1;
-				}
-			}
-		}else sbtKey2_state = 0;
+		show_shumaguan();
 
 		if (flag_100mS==1)
 		{
 			 t=GetDA1302();
 			 flag_100mS=0;
+		}
+		
+		if (sbtKey1 == 0) {
+			if (sbtKey1_state == 0) {
+				Delay10ms();
+				if (sbtKey1 == 0) {
+					show_flag = !show_flag;
+					sbtKey1_state = 1;
+				}
+			}
+		}else sbtKey1_state = 0;
+		if (show_flag == 0) {
+			sbtVib = 1;
+			if (sbtVib == 0) {
+				tiptap = 1;
+			}
 		}
 	}
 }
