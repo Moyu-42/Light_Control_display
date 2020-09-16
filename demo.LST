@@ -1,4 +1,4 @@
-C51 COMPILER V9.51   DEMO                                                                  09/16/2020 11:40:37 PAGE 1   
+C51 COMPILER V9.51   DEMO                                                                  09/16/2020 16:34:08 PAGE 1   
 
 
 C51 COMPILER V9.51, COMPILATION OF MODULE DEMO
@@ -62,7 +62,7 @@ line level    source
   51          uint light = 0; //光
   52          uint light_choice = 0;
   53          uint light_bai = 0;
-C51 COMPILER V9.51   DEMO                                                                  09/16/2020 11:40:37 PAGE 2   
+C51 COMPILER V9.51   DEMO                                                                  09/16/2020 16:34:08 PAGE 2   
 
   54          uint light_shi = 0;
   55          uint light_ge = 0;
@@ -126,7 +126,7 @@ line level    source
  113   2                      _nop_();
  114   2                      _nop_();
  115   2              }
-C51 COMPILER V9.51   DEMO                                                                  09/16/2020 11:40:37 PAGE 3   
+C51 COMPILER V9.51   DEMO                                                                  09/16/2020 16:34:08 PAGE 3   
 
  116   1              return dat; //返回读取出的数据
  117   1      }
@@ -190,7 +190,7 @@ line level    source
  175   1              DS1302Write(0X8E, 0X00); //写保护关
  176   1              DS1302Write(DS1302_second_write, sec);
  177   1              DS1302Write(DS1302_minutes_write, min);
-C51 COMPILER V9.51   DEMO                                                                  09/16/2020 11:40:37 PAGE 4   
+C51 COMPILER V9.51   DEMO                                                                  09/16/2020 16:34:08 PAGE 4   
 
  178   1              DS1302Write(DS1302_hour_write, hour);
  179   1              temp = DS1302Read(DS1302_second_read) & 0x7f;
@@ -247,14 +247,14 @@ line level    source
  230   1              TL0 = (65535 - 40000) % 256;
  231   1              TR0 = 1; //启动定时器
  232   1      
- 233   1              TH1 = (65535 - 50000) / 256;
- 234   1              TL1 = (65535 - 50000) % 256;
+ 233   1              TH1 = 0xD4;
+ 234   1              TL1 = 0xCD;
  235   1              TR1 = 1;
  236   1              ET0 = 1; //开启定时器中断
  237   1              ET1 = 1;
  238   1      }
  239          void InitADC_light() //初始化光ADC
-C51 COMPILER V9.51   DEMO                                                                  09/16/2020 11:40:37 PAGE 5   
+C51 COMPILER V9.51   DEMO                                                                  09/16/2020 16:34:08 PAGE 5   
 
  240          {
  241   1              ADC_RES = 0;
@@ -288,8 +288,8 @@ line level    source
  269   1      }
  270          void time1() interrupt 3
  271          {
- 272   1              TH1 = (65535 - 50000) / 256;
- 273   1              TL1 = (65535 - 50000) % 256;
+ 272   1              TH1 = 0xD4;
+ 273   1              TL1 = 0xCD;
  274   1              EA = 0;
  275   1              Light_Control();
  276   1              EA = 1;
@@ -318,7 +318,7 @@ line level    source
  299   1      }
  300          void show_shumaguan()
  301          {
-C51 COMPILER V9.51   DEMO                                                                  09/16/2020 11:40:37 PAGE 6   
+C51 COMPILER V9.51   DEMO                                                                  09/16/2020 16:34:08 PAGE 6   
 
  302   1              i++;
  303   1              if (++sec == 100)
@@ -382,7 +382,7 @@ line level    source
  361   3                              P0 = duan[t.minute % 10];
  362   3                              break;
  363   3                      case 6:
-C51 COMPILER V9.51   DEMO                                                                  09/16/2020 11:40:37 PAGE 7   
+C51 COMPILER V9.51   DEMO                                                                  09/16/2020 16:34:08 PAGE 7   
 
  364   3                              P0 = duan[t.second / 10];
  365   3                              break;
@@ -446,7 +446,7 @@ line level    source
  423   2      
  424   2                      if (sbtKey2 == 0)
  425   2                      {
-C51 COMPILER V9.51   DEMO                                                                  09/16/2020 11:40:37 PAGE 8   
+C51 COMPILER V9.51   DEMO                                                                  09/16/2020 16:34:08 PAGE 8   
 
  426   3                              if (sbtKey2_state == 0)
  427   3                              {

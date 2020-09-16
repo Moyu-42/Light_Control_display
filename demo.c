@@ -230,8 +230,8 @@ void init()
 	TL0 = (65535 - 40000) % 256;
 	TR0 = 1; //启动定时器
 
-	TH1 = (65535 - 50000) / 256;
-	TL1 = (65535 - 50000) % 256;
+	TH1 = 0xD4;
+	TL1 = 0xCD;
 	TR1 = 1;
 	ET0 = 1; //开启定时器中断
 	ET1 = 1;
@@ -269,8 +269,8 @@ void Light_Control() {
 }
 void time1() interrupt 3
 {
-	TH1 = (65535 - 50000) / 256;
-	TL1 = (65535 - 50000) % 256;
+	TH1 = 0xD4;
+	TL1 = 0xCD;
 	EA = 0;
 	Light_Control();
 	EA = 1;
