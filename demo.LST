@@ -1,4 +1,4 @@
-C51 COMPILER V9.51   DEMO                                                                  09/16/2020 10:24:28 PAGE 1   
+C51 COMPILER V9.51   DEMO                                                                  09/16/2020 10:52:58 PAGE 1   
 
 
 C51 COMPILER V9.51, COMPILATION OF MODULE DEMO
@@ -62,449 +62,428 @@ line level    source
   52          uint light_choice = 0;
   53          uint light_bai = 0;
   54          uint light_shi = 0;
-C51 COMPILER V9.51   DEMO                                                                  09/16/2020 10:24:28 PAGE 2   
+C51 COMPILER V9.51   DEMO                                                                  09/16/2020 10:52:58 PAGE 2   
 
   55          uint light_ge = 0;
   56          // 双击亮屏
-  57          uchar i_;
-  58          uint tiptap = 0;
-  59          uint Vib_flap = 0;
-  60          uint ret = 0;
-  61          //定义时间结构体
-  62          typedef struct _systemtime_
-  63          {
-  64                  uchar second;
-  65                  uchar minute;
-  66                  uchar hour;
-  67                  uchar day;
-  68                  uchar week;
-  69                  uchar month;
-  70                  uchar year;
-  71          } systemtime;
-  72          
-  73          systemtime t;
-  74          uchar i;
-  75          uchar temp;
-  76          int sec = 0;
-  77          char flag_100mS = 0;
-  78          
-  79          //DS1302写一个字节的数据
-  80          void DS1302WriteByte(uchar dat)
-  81          {
-  82   1              uchar i;
-  83   1              RTC_sclk = 0; //初始时钟线置0
+  57          uint tiptap = 0;
+  58          uint Vib_flap = 0;
+  59          uint ret = 0;
+  60          //定义时间结构体
+  61          typedef struct _systemtime_
+  62          {
+  63                  uchar second;
+  64                  uchar minute;
+  65                  uchar hour;
+  66                  uchar day;
+  67                  uchar week;
+  68                  uchar month;
+  69                  uchar year;
+  70          } systemtime;
+  71          
+  72          systemtime t;
+  73          uchar i;
+  74          uchar temp;
+  75          int sec = 0;
+  76          char flag_100mS = 0;
+  77          
+  78          //DS1302写一个字节的数据
+  79          void DS1302WriteByte(uchar dat)
+  80          {
+  81   1              uchar i;
+  82   1              RTC_sclk = 0; //初始时钟线置0
+  83   1              _nop_();
   84   1              _nop_();
-  85   1              _nop_();
-  86   1              for (i = 0; i < 8; i++) //开始传输8位数据
-  87   1              {
-  88   2                      RTC_io = dat & 0x01; //取最低位
+  85   1              for (i = 0; i < 8; i++) //开始传输8位数据
+  86   1              {
+  87   2                      RTC_io = dat & 0x01; //取最低位
+  88   2                      _nop_();
   89   2                      _nop_();
-  90   2                      _nop_();
-  91   2                      RTC_sclk = 1; //时钟线拉高，制造上升沿，数据被传输
+  90   2                      RTC_sclk = 1; //时钟线拉高，制造上升沿，数据被传输
+  91   2                      _nop_();
   92   2                      _nop_();
-  93   2                      _nop_();
-  94   2                      RTC_sclk = 0; //时钟线拉低，为下一个上升沿做准备
-  95   2                      dat >>= 1;        //数据右移一位，准备传输下一位数据
-  96   2              }
-  97   1      }
-  98          
-  99          ////DS1302读一个字节的数据
- 100          uchar DS1302ReadByte()
- 101          {
- 102   1              uchar i, dat;
+  93   2                      RTC_sclk = 0; //时钟线拉低，为下一个上升沿做准备
+  94   2                      dat >>= 1;        //数据右移一位，准备传输下一位数据
+  95   2              }
+  96   1      }
+  97          
+  98          ////DS1302读一个字节的数据
+  99          uchar DS1302ReadByte()
+ 100          {
+ 101   1              uchar i, dat;
+ 102   1              _nop_();
  103   1              _nop_();
- 104   1              _nop_();
- 105   1              for (i = 0; i < 8; i++)
- 106   1              {
- 107   2                      dat >>= 1;               //要返回的数据右移一位
- 108   2                      if (RTC_io == 1) //当数据线为高时，证明该位数据为1
- 109   2                              dat |= 0x80;
- 110   2                      RTC_sclk = 1;
+ 104   1              for (i = 0; i < 8; i++)
+ 105   1              {
+ 106   2                      dat >>= 1;               //要返回的数据右移一位
+ 107   2                      if (RTC_io == 1) //当数据线为高时，证明该位数据为1
+ 108   2                              dat |= 0x80;
+ 109   2                      RTC_sclk = 1;
+ 110   2                      _nop_();
  111   2                      _nop_();
- 112   2                      _nop_();
- 113   2                      RTC_sclk = 0; //制造下降沿
+ 112   2                      RTC_sclk = 0; //制造下降沿
+ 113   2                      _nop_();
  114   2                      _nop_();
- 115   2                      _nop_();
- 116   2              }
-C51 COMPILER V9.51   DEMO                                                                  09/16/2020 10:24:28 PAGE 3   
+ 115   2              }
+ 116   1              return dat; //返回读取出的数据
+C51 COMPILER V9.51   DEMO                                                                  09/16/2020 10:52:58 PAGE 3   
 
- 117   1              return dat; //返回读取出的数据
- 118   1      }
- 119          
- 120          //读相应地址中写一个字节的数据
- 121          uchar DS1302Read(uchar cmd)
- 122          {
- 123   1              uchar dat;
- 124   1              RTC_rst = 0;                    //初始CE置0
- 125   1              RTC_sclk = 0;                   //初始时钟置0
- 126   1              RTC_rst = 1;                    //初始CE置1，传输开始
- 127   1              DS1302WriteByte(cmd);   //传输命令字，
- 128   1              dat = DS1302ReadByte(); //读取得到的时间
- 129   1              RTC_sclk = 1;                   //时钟线拉高
- 130   1              RTC_rst = 0;                    //读取结束，CE置0，结束数据传输
- 131   1              return dat;                             //返回得到的时间日期
- 132   1      }
- 133          
- 134          //在相应地址中写数据
- 135          void DS1302Write(uchar cmd, uchar dat)
- 136          {
- 137   1              RTC_rst = 0;              //初始CE置0
- 138   1              RTC_sclk = 0;             //初始时钟置0
- 139   1              RTC_rst = 1;              //置1，传输开始
- 140   1              DS1302WriteByte(cmd); //传输命令字，要写入的时间的地址
- 141   1              DS1302WriteByte(dat); //写入修改的时间
- 142   1              RTC_sclk = 1;             //时钟线拉高
- 143   1              RTC_rst = 0;              //读取结束，CE=0，结束数据的传输
- 144   1      }
- 145          //DS1302的时间值获取程序
- 146          systemtime GetDA1302()
- 147          {
- 148   1              systemtime time;
- 149   1              uchar realvalue;
- 150   1              realvalue = DS1302Read(DS1302_second_read);
- 151   1              time.second = ((realvalue & 0x70) >> 4) * 10 + (realvalue & 0x0f);
- 152   1              realvalue = DS1302Read(DS1302_minutes_read);
- 153   1              time.minute = ((realvalue & 0x70) >> 4) * 10 + (realvalue & 0x0f);
- 154   1              realvalue = DS1302Read(DS1302_hour_read);
- 155   1              time.hour = ((realvalue & 0x70) >> 4) * 10 + (realvalue & 0x0f);
- 156   1              realvalue = DS1302Read(DS1302_date_read);
- 157   1              time.day = ((realvalue & 0x70) >> 4) * 10 + (realvalue & 0x0f);
- 158   1              realvalue = DS1302Read(DS1302_week_read);
- 159   1              time.week = ((realvalue & 0x70) >> 4) * 10 + (realvalue & 0x0f);
- 160   1              realvalue = DS1302Read(DS1302_month_read);
- 161   1              time.month = ((realvalue & 0x70) >> 4) * 10 + (realvalue & 0x0f);
- 162   1              realvalue = DS1302Read(DS1302_year_read);
- 163   1              time.year = ((realvalue & 0x70) >> 4) * 10 + (realvalue & 0x0f);
- 164   1              return time;
- 165   1      }
- 166          //DS1302初始化程序
- 167          void Init_DS1302()
- 168          {
- 169   1              unsigned char hour, min, sec;
- 170   1              unsigned char code DataStr[] = __TIME__; //格式："09:12:04"       9字符（含结束符）
- 171   1      
- 172   1              hour = ((toint(DataStr[0])) << 4) + toint(DataStr[1]);
- 173   1              min = ((toint(DataStr[3])) << 4) + toint(DataStr[4]);
- 174   1              sec = ((toint(DataStr[6])) << 4) + toint(DataStr[7]);
- 175   1      
- 176   1              DS1302Write(0X8E, 0X00); //写保护关
- 177   1              DS1302Write(DS1302_second_write, sec);
- 178   1              DS1302Write(DS1302_minutes_write, min);
-C51 COMPILER V9.51   DEMO                                                                  09/16/2020 10:24:28 PAGE 4   
+ 117   1      }
+ 118          
+ 119          //读相应地址中写一个字节的数据
+ 120          uchar DS1302Read(uchar cmd)
+ 121          {
+ 122   1              uchar dat;
+ 123   1              RTC_rst = 0;                    //初始CE置0
+ 124   1              RTC_sclk = 0;                   //初始时钟置0
+ 125   1              RTC_rst = 1;                    //初始CE置1，传输开始
+ 126   1              DS1302WriteByte(cmd);   //传输命令字，
+ 127   1              dat = DS1302ReadByte(); //读取得到的时间
+ 128   1              RTC_sclk = 1;                   //时钟线拉高
+ 129   1              RTC_rst = 0;                    //读取结束，CE置0，结束数据传输
+ 130   1              return dat;                             //返回得到的时间日期
+ 131   1      }
+ 132          
+ 133          //在相应地址中写数据
+ 134          void DS1302Write(uchar cmd, uchar dat)
+ 135          {
+ 136   1              RTC_rst = 0;              //初始CE置0
+ 137   1              RTC_sclk = 0;             //初始时钟置0
+ 138   1              RTC_rst = 1;              //置1，传输开始
+ 139   1              DS1302WriteByte(cmd); //传输命令字，要写入的时间的地址
+ 140   1              DS1302WriteByte(dat); //写入修改的时间
+ 141   1              RTC_sclk = 1;             //时钟线拉高
+ 142   1              RTC_rst = 0;              //读取结束，CE=0，结束数据的传输
+ 143   1      }
+ 144          //DS1302的时间值获取程序
+ 145          systemtime GetDA1302()
+ 146          {
+ 147   1              systemtime time;
+ 148   1              uchar realvalue;
+ 149   1              realvalue = DS1302Read(DS1302_second_read);
+ 150   1              time.second = ((realvalue & 0x70) >> 4) * 10 + (realvalue & 0x0f);
+ 151   1              realvalue = DS1302Read(DS1302_minutes_read);
+ 152   1              time.minute = ((realvalue & 0x70) >> 4) * 10 + (realvalue & 0x0f);
+ 153   1              realvalue = DS1302Read(DS1302_hour_read);
+ 154   1              time.hour = ((realvalue & 0x70) >> 4) * 10 + (realvalue & 0x0f);
+ 155   1              realvalue = DS1302Read(DS1302_date_read);
+ 156   1              time.day = ((realvalue & 0x70) >> 4) * 10 + (realvalue & 0x0f);
+ 157   1              realvalue = DS1302Read(DS1302_week_read);
+ 158   1              time.week = ((realvalue & 0x70) >> 4) * 10 + (realvalue & 0x0f);
+ 159   1              realvalue = DS1302Read(DS1302_month_read);
+ 160   1              time.month = ((realvalue & 0x70) >> 4) * 10 + (realvalue & 0x0f);
+ 161   1              realvalue = DS1302Read(DS1302_year_read);
+ 162   1              time.year = ((realvalue & 0x70) >> 4) * 10 + (realvalue & 0x0f);
+ 163   1              return time;
+ 164   1      }
+ 165          //DS1302初始化程序
+ 166          void Init_DS1302()
+ 167          {
+ 168   1              unsigned char hour, min, sec;
+ 169   1              unsigned char code DataStr[] = __TIME__; //格式："09:12:04"       9字符（含结束符）
+ 170   1      
+ 171   1              hour = ((toint(DataStr[0])) << 4) + toint(DataStr[1]);
+ 172   1              min = ((toint(DataStr[3])) << 4) + toint(DataStr[4]);
+ 173   1              sec = ((toint(DataStr[6])) << 4) + toint(DataStr[7]);
+ 174   1      
+ 175   1              DS1302Write(0X8E, 0X00); //写保护关
+ 176   1              DS1302Write(DS1302_second_write, sec);
+ 177   1              DS1302Write(DS1302_minutes_write, min);
+ 178   1              DS1302Write(DS1302_hour_write, hour);
+C51 COMPILER V9.51   DEMO                                                                  09/16/2020 10:52:58 PAGE 4   
 
- 179   1              DS1302Write(DS1302_hour_write, hour);
- 180   1              temp = DS1302Read(DS1302_second_read) & 0x7f;
- 181   1              DS1302Write(DS1302_second_write, temp);
- 182   1              DS1302Write(0X8E, 0X80); //写保护置1
- 183   1      }
- 184          
- 185          void set_charge_DS1302()
- 186          {
- 187   1              DS1302Write(0X8E, 0X00); //写保护关
- 188   1              DS1302Write(0x90, 0xa9); //  充电设置：允许充电，2个二极管，2K电
- 189   1              DS1302Write(0X8E, 0X80); //写保护置1
- 190   1      }
- 191          
- 192          // void Delay(int n) //????
- 193          // {
- 194          //      int x;
- 195          //      while (n--)
- 196          //      {
- 197          //              x = 60;
- 198          //              while (x--)
- 199          //                      ;
- 200          //      }
- 201          // }
- 202          void Delay500us() //@11.0592MHz
- 203          {
- 204   1              unsigned char i, j;
- 205   1      
- 206   1              _nop_();
- 207   1              _nop_();
- 208   1              i = 3;
- 209   1              j = 35;
- 210   1              do
- 211   1              {
- 212   2                      while (--j)
- 213   2                              ;
- 214   2              } while (--i);
- 215   1      }
- 216          void Delay10ms() //@11.0592MHz
- 217          {
- 218   1              unsigned char i, j;
- 219   1      
- 220   1              i = 108;
- 221   1              j = 145;
- 222   1              do
- 223   1              {
- 224   2                      while (--j)
- 225   2                              ;
- 226   2              } while (--i);
- 227   1      }
- 228          
- 229          //系统初始化程序
- 230          void init()
- 231          {
- 232   1              P3 = 0xEF; //关蜂鸣器
- 233   1              P2M0 = 0XFF;
- 234   1              P2M1 = 0X00;
- 235   1              P0M0 = 0XFF;
- 236   1              P0M1 = 0X00;
- 237   1      
- 238   1              led_sel = 0;                             //选通数码管
- 239   1              TMOD = 0X11;                             //定时器0，工作方式1
- 240   1              EA = 1;                                          //打开总中断
-C51 COMPILER V9.51   DEMO                                                                  09/16/2020 10:24:28 PAGE 5   
+ 179   1              temp = DS1302Read(DS1302_second_read) & 0x7f;
+ 180   1              DS1302Write(DS1302_second_write, temp);
+ 181   1              DS1302Write(0X8E, 0X80); //写保护置1
+ 182   1      }
+ 183          
+ 184          void set_charge_DS1302()
+ 185          {
+ 186   1              DS1302Write(0X8E, 0X00); //写保护关
+ 187   1              DS1302Write(0x90, 0xa9); //  充电设置：允许充电，2个二极管，2K电
+ 188   1              DS1302Write(0X8E, 0X80); //写保护置1
+ 189   1      }
+ 190          void Delay20us()                //@11.0592MHz
+ 191          {
+ 192   1              unsigned char i;
+ 193   1      
+ 194   1              _nop_();
+ 195   1              _nop_();
+ 196   1              _nop_();
+ 197   1              i = 52;
+ 198   1              while (--i);
+ 199   1      }
+ 200          void Delay10ms() //@11.0592MHz
+ 201          {
+ 202   1              unsigned char i, j;
+ 203   1      
+ 204   1              i = 108;
+ 205   1              j = 145;
+ 206   1              do
+ 207   1              {
+ 208   2                      while (--j)
+ 209   2                              ;
+ 210   2              } while (--i);
+ 211   1      }
+ 212          
+ 213          //系统初始化程序
+ 214          void init()
+ 215          {
+ 216   1              P3 = 0xEF; //关蜂鸣器
+ 217   1              P2M0 = 0XFF;
+ 218   1              P2M1 = 0X00;
+ 219   1              P0M0 = 0XFF;
+ 220   1              P0M1 = 0X00;
+ 221   1      
+ 222   1              led_sel = 0; //选通数码管
+ 223   1              TMOD = 0X11; //定时器0，工作方式1
+ 224   1              EA = 1;          //打开总中断
+ 225   1              EADC = 1;
+ 226   1              TH0 = (65535 - 40000) / 256; //设置定时初值
+ 227   1              TL0 = (65535 - 40000) % 256;
+ 228   1              TR0 = 1; //启动定时器
+ 229   1      
+ 230   1              TH1 = (65535 - 50000) / 256;
+ 231   1              TL1 = (65535 - 50000) % 256;
+ 232   1              TR1 = 1;
+ 233   1              ET0 = 1; //开启定时器中断
+ 234   1              ET1 = 1;
+ 235   1      }
+ 236          void InitADC_light() //初始化光ADC
+ 237          {
+ 238   1              ADC_RES = 0;
+ 239   1              ADC_RESL = 0;
+ 240   1              ADC_CONTR = 0x8c; //CHS=100选择P1^4作为A/D输入使用
+C51 COMPILER V9.51   DEMO                                                                  09/16/2020 10:52:58 PAGE 5   
 
- 241   1              EADC = 1;
- 242   1              TH0 = (65535 - 40000) / 256; //设置定时初值
- 243   1              TL0 = (65535 - 40000) % 256;
- 244   1              TR0 = 1; //启动定时器
- 245   1              
- 246   1              TH1 = (65535 - 50000) / 256;
- 247   1              TL1 = (65535 - 50000) % 256;
- 248   1              TR1 = 1;
- 249   1              ET0 = 1; //开启定时器中断
- 250   1              ET1 = 1;
- 251   1      }
- 252          void InitADC_light() //初始化光ADC
- 253          {
- 254   1              ADC_RES = 0;
- 255   1              ADC_RESL = 0;
- 256   1              ADC_CONTR = 0x8c; //CHS=100选择P1^4作为A/D输入使用
- 257   1              CLK_DIV = 0x20;
- 258   1      }
- 259          void date_processlight()
- 260          {
- 261   1              light_bai = light % 1000 / 100;
- 262   1              light_shi = light % 100 / 10;
- 263   1              light_ge = light % 10;
- 264   1      }
- 265          void time0() interrupt 1
- 266          {
- 267   1              TH0 = (65535 - 40000) / 256; //设置定时初值
- 268   1              TL0 = (65535 - 40000) % 256;
- 269   1              EA = 0;
- 270   1              InitADC_light(); //初始化光
- 271   1              EA = 1;
- 272   1      }
- 273          void time1() interrupt 3 {
- 274   1              TH1 = (65535 - 50000) / 256;
- 275   1              TL1 = (65535 - 50000) % 256;
- 276   1              EA = 0;
- 277   1              
- 278   1              EA = 1;
- 279   1      }
- 280          // AD中断
- 281          void adc_isr() interrupt 5 using 1
- 282          {
- 283   1              time_++;
- 284   1              EA = 0; //关闭中断
- 285   1      
- 286   1              if (time_ > 2000) //取多次值求平均值减小误差
- 287   1              {
- 288   2                      light = (suml + l / 2) / l; //四舍五入
- 289   2                      suml = 0;
- 290   2                      l = 0;
- 291   2                      time_ = 0;
- 292   2                      date_processlight();
- 293   2                      if (light >= Light_Level[light_choice] && light < Light_Level[light_choice])
- 294   2                              light_choice = light_choice;
- 295   2                      else if (light < Light_Level[light_choice]){
- 296   3                              light_choice -= 1;
- 297   3                              if (light_choice <= 0)
- 298   3                                      light_choice = 0;
- 299   3                              Led_Value += 4;
- 300   3                              if (Led_Value > 44)
- 301   3                                      Led_Value = 44;
- 302   3                      }
-C51 COMPILER V9.51   DEMO                                                                  09/16/2020 10:24:28 PAGE 6   
+ 241   1              CLK_DIV = 0x20;
+ 242   1      }
+ 243          void date_processlight()
+ 244          {
+ 245   1              light_bai = light % 1000 / 100;
+ 246   1              light_shi = light % 100 / 10;
+ 247   1              light_ge = light % 10;
+ 248   1      }
+ 249          void time0() interrupt 1
+ 250          {
+ 251   1              TH0 = (65535 - 40000) / 256; //设置定时初值
+ 252   1              TL0 = (65535 - 40000) % 256;
+ 253   1              EA = 0;
+ 254   1              InitADC_light(); //初始化光
+ 255   1              EA = 1;
+ 256   1      }
+ 257          void time1() interrupt 3
+ 258          {
+ 259   1              TH1 = (65535 - 50000) / 256;
+ 260   1              TL1 = (65535 - 50000) % 256;
+ 261   1              EA = 0;
+ 262   1              if (light >= Light_Level[light_choice] && light < Light_Level[light_choice])
+ 263   1                      light_choice = light_choice;
+ 264   1              else if (light < Light_Level[light_choice])
+ 265   1              {
+ 266   2                      light_choice -= 1;
+ 267   2                      if (light_choice <= 0)
+ 268   2                              light_choice = 0;
+ 269   2                      Led_Value += 4;
+ 270   2                      if (Led_Value > 44)
+ 271   2                              Led_Value = 44;
+ 272   2              }
+ 273   1              else
+ 274   1              {
+ 275   2                      light_choice += 1;
+ 276   2                      if (light_choice >= 8)
+ 277   2                              light_choice = 8;
+ 278   2                      Led_Value -= 4;
+ 279   2                      if (Led_Value < 8)
+ 280   2                              Led_Value = 8;
+ 281   2              }
+ 282   1              EA = 1;
+ 283   1      }
+ 284          // AD中断
+ 285          void adc_isr() interrupt 5 using 1
+ 286          {
+ 287   1              time_++;
+ 288   1              EA = 0; //关闭中断
+ 289   1      
+ 290   1              if (time_ > 2000) //取多次值求平均值减小误差
+ 291   1              {
+ 292   2                      light = (suml + l / 2) / l; //四舍五入
+ 293   2                      suml = 0;
+ 294   2                      l = 0;
+ 295   2                      time_ = 0;
+ 296   2                      date_processlight();
+ 297   2              }
+ 298   1              //处理光部分的数据
+ 299   1              l++;
+ 300   1              suml += ADC_RES * 256 + ADC_RESL; //求l次AD值的和
+ 301   1      
+ 302   1              ADC_CONTR &= ~0X10; //转换完成后，ADC_FLAG清零
+C51 COMPILER V9.51   DEMO                                                                  09/16/2020 10:52:58 PAGE 6   
 
- 303   2                      else {
- 304   3                              light_choice += 1;
- 305   3                              if (light_choice >= 8)
- 306   3                                      light_choice = 8;
- 307   3                              Led_Value -= 4;
- 308   3                              if (Led_Value < 8)
- 309   3                                      Led_Value = 8;
- 310   3                      }
- 311   2              }
- 312   1              //处理光部分的数据
- 313   1              l++;
- 314   1              suml += ADC_RES * 256 + ADC_RESL; //求l次AD值的和
- 315   1      
- 316   1              ADC_CONTR &= ~0X10; //转换完成后，ADC_FLAG清零
- 317   1              ADC_CONTR |= 0X08;      //转换完成后，ADC_START赋1
- 318   1              EA = 1;                         //打开中断
- 319   1      }
- 320          // void weixuan(char i) //数码管位的选择
- 321          // {
- 322          //      SEL2 = i / 4;
- 323          //      SEL1 = i % 4 / 2;
- 324          //      SEL0 = i % 2;
- 325          // }
- 326          void show_shumaguan()
- 327          {
- 328   1              i++;
- 329   1              if (++sec == 100)
- 330   1              {
- 331   2                      sec = 0;
- 332   2                      flag_100mS = 1;
- 333   2              }
- 334   1              if (i == Led_Value)
- 335   1                      i = 0;
- 336   1              led_sel = 0;
- 337   1              P0 = 0X00;
- 338   1              if (show_flag == 1 && i < 8 && light_dig == 1)
- 339   1              {
- 340   2                      P2 = wei[i];
- 341   2                      switch (i)
- 342   2                      {
- 343   3                      case 0:
- 344   3                              P0 = duan[t.hour / 10];
- 345   3                              break;
- 346   3                      case 1:
- 347   3                              P0 = duan[t.hour % 10];
- 348   3                              break;
- 349   3                      case 3:
- 350   3                              P0 = duan[t.minute / 10];
- 351   3                              break;
- 352   3                      case 4:
- 353   3                              P0 = duan[t.minute % 10];
- 354   3                              break;
- 355   3                      case 6:
- 356   3                              P0 = duan[t.second / 10];
- 357   3                              break;
- 358   3                      case 7:
- 359   3                              P0 = duan[t.second % 10];
- 360   3                              break;
- 361   3                      default:
- 362   3                              P0 = 0x40;
- 363   3                              break;
- 364   3                      }
-C51 COMPILER V9.51   DEMO                                                                  09/16/2020 10:24:28 PAGE 7   
+ 303   1              ADC_CONTR |= 0X08;      //转换完成后，ADC_START赋1
+ 304   1              EA = 1;                         //打开中断
+ 305   1      }
+ 306          void show_shumaguan()
+ 307          {
+ 308   1              i++;
+ 309   1              if (++sec == 100)
+ 310   1              {
+ 311   2                      sec = 0;
+ 312   2                      flag_100mS = 1;
+ 313   2              }
+ 314   1              if (i == Led_Value)
+ 315   1                      i = 0;
+ 316   1              led_sel = 0;
+ 317   1              P0 = 0X00;
+ 318   1              if (show_flag == 1 && i < 8 && light_dig == 1)
+ 319   1              {
+ 320   2                      P2 = wei[i];
+ 321   2                      switch (i)
+ 322   2                      {
+ 323   3                      case 0:
+ 324   3                              P0 = duan[t.hour / 10];
+ 325   3                              break;
+ 326   3                      case 1:
+ 327   3                              P0 = duan[t.hour % 10];
+ 328   3                              break;
+ 329   3                      case 3:
+ 330   3                              P0 = duan[t.minute / 10];
+ 331   3                              break;
+ 332   3                      case 4:
+ 333   3                              P0 = duan[t.minute % 10];
+ 334   3                              break;
+ 335   3                      case 6:
+ 336   3                              P0 = duan[t.second / 10];
+ 337   3                              break;
+ 338   3                      case 7:
+ 339   3                              P0 = duan[t.second % 10];
+ 340   3                              break;
+ 341   3                      default:
+ 342   3                              P0 = 0x40;
+ 343   3                              break;
+ 344   3                      }
+ 345   2              }
+ 346   1              else if (show_flag == 0 && tiptap == 1 && light_dig == 1 && i < 8)
+ 347   1              {
+ 348   2                      ret += 1;
+ 349   2                      if (ret == 3000)
+ 350   2                      {
+ 351   3                              ret = 0;
+ 352   3                              tiptap = 0;
+ 353   3                      }
+ 354   2                      P2 = wei[i];
+ 355   2                      switch (i)
+ 356   2                      {
+ 357   3                      case 0:
+ 358   3                              P0 = duan[t.hour / 10];
+ 359   3                              break;
+ 360   3                      case 1:
+ 361   3                              P0 = duan[t.hour % 10];
+ 362   3                              break;
+ 363   3                      case 3:
+ 364   3                              P0 = duan[t.minute / 10];
+C51 COMPILER V9.51   DEMO                                                                  09/16/2020 10:52:58 PAGE 7   
 
- 365   2              }
- 366   1              else if (show_flag == 0 && tiptap == 1 && light_dig == 1)
- 367   1              {
- 368   2                      ret += 1;
- 369   2                      if (ret == 3000)
- 370   2                      {
- 371   3                              ret = 0;
- 372   3                              tiptap = 0;
- 373   3                      }
- 374   2                      i_ = i % 8;
- 375   2                      P2 = wei[i_];
- 376   2                      switch (i_)
- 377   2                      {
- 378   3                      case 0:
- 379   3                              P0 = duan[t.hour / 10];
- 380   3                              break;
- 381   3                      case 1:
- 382   3                              P0 = duan[t.hour % 10];
- 383   3                              break;
- 384   3                      case 3:
- 385   3                              P0 = duan[t.minute / 10];
- 386   3                              break;
- 387   3                      case 4:
- 388   3                              P0 = duan[t.minute % 10];
- 389   3                              break;
- 390   3                      case 6:
- 391   3                              P0 = duan[t.second / 10];
- 392   3                              break;
- 393   3                      case 7:
- 394   3                              P0 = duan[t.second % 10];
- 395   3                              break;
- 396   3                      default:
- 397   3                              P0 = 0x40;
- 398   3                              break;
- 399   3                      }
- 400   2              }
- 401   1              else if (light_dig == 0 && i < 3)       
- 402   1              {
- 403   2                      P2 = wei[i];
- 404   2                      switch (i)
- 405   2                      {
- 406   3                              case 0:
- 407   3                                      P0 = duan[light_bai];
- 408   3                                      break;
- 409   3                              case 1:
- 410   3                                      P0 = duan[light_shi];
- 411   3                                      break;
- 412   3                              case 2:
- 413   3                                      P0 = duan[light_ge];
- 414   3                                      break;
- 415   3                      }
- 416   2              }
- 417   1              Delay500us();
- 418   1      }
- 419          
- 420          void main()
- 421          {
- 422   1              init();
- 423   1              if (DS1302Read(DS1302_second_read) & 0X80)
- 424   1                      Init_DS1302();
- 425   1              set_charge_DS1302();
- 426   1              while (1)
-C51 COMPILER V9.51   DEMO                                                                  09/16/2020 10:24:28 PAGE 8   
+ 365   3                              break;
+ 366   3                      case 4:
+ 367   3                              P0 = duan[t.minute % 10];
+ 368   3                              break;
+ 369   3                      case 6:
+ 370   3                              P0 = duan[t.second / 10];
+ 371   3                              break;
+ 372   3                      case 7:
+ 373   3                              P0 = duan[t.second % 10];
+ 374   3                              break;
+ 375   3                      default:
+ 376   3                              P0 = 0x40;
+ 377   3                              break;
+ 378   3                      }
+ 379   2              }
+ 380   1              else if (light_dig == 0 && i < 3)
+ 381   1              {
+ 382   2                      P2 = wei[i];
+ 383   2                      switch (i)
+ 384   2                      {
+ 385   3                      case 0:
+ 386   3                              P0 = duan[light_bai];
+ 387   3                              break;
+ 388   3                      case 1:
+ 389   3                              P0 = duan[light_shi];
+ 390   3                              break;
+ 391   3                      case 2:
+ 392   3                              P0 = duan[light_ge];
+ 393   3                              break;
+ 394   3                      }
+ 395   2              }
+ 396   1              Delay20us();
+ 397   1      }
+ 398          
+ 399          void main()
+ 400          {
+ 401   1              init();
+ 402   1              if (DS1302Read(DS1302_second_read) & 0X80)
+ 403   1                      Init_DS1302();
+ 404   1              set_charge_DS1302();
+ 405   1              while (1)
+ 406   1              {
+ 407   2                      show_shumaguan();
+ 408   2      
+ 409   2                      if (flag_100mS == 1)
+ 410   2                      {
+ 411   3                              t = GetDA1302();
+ 412   3                              flag_100mS = 0;
+ 413   3                      }
+ 414   2      
+ 415   2                      if (sbtKey1 == 0)
+ 416   2                      {
+ 417   3                              if (sbtKey1_state == 0)
+ 418   3                              {
+ 419   4                                      Delay10ms();
+ 420   4                                      if (sbtKey1 == 0)
+ 421   4                                      {
+ 422   5                                              show_flag = !show_flag;
+ 423   5                                              sbtKey1_state = 1;
+ 424   5                                      }
+ 425   4                              }
+ 426   3                      }
+C51 COMPILER V9.51   DEMO                                                                  09/16/2020 10:52:58 PAGE 8   
 
- 427   1              {
- 428   2                      show_shumaguan();
+ 427   2                      else
+ 428   2                              sbtKey1_state = 0;
  429   2      
- 430   2                      if (flag_100mS == 1)
+ 430   2                      if (sbtKey2 == 0)
  431   2                      {
- 432   3                              t = GetDA1302();
- 433   3                              flag_100mS = 0;
- 434   3                      }
- 435   2      
- 436   2                      if (sbtKey1 == 0)
- 437   2                      {
- 438   3                              if (sbtKey1_state == 0)
- 439   3                              {
- 440   4                                      Delay10ms();
- 441   4                                      if (sbtKey1 == 0)
- 442   4                                      {
- 443   5                                              show_flag = !show_flag;
- 444   5                                              sbtKey1_state = 1;
- 445   5                                      }
- 446   4                              }
- 447   3                      }
- 448   2                      else
- 449   2                              sbtKey1_state = 0;
- 450   2      
- 451   2                      if (sbtKey2 == 0)
- 452   2                      {
- 453   3                              if (sbtKey2_state == 0)
- 454   3                              {
- 455   4                                      Delay10ms();
- 456   4                                      if (sbtKey2 == 0)
- 457   4                                      {
- 458   5                                              light_dig = !light_dig;
- 459   5                                              sbtKey2_state = 1;
- 460   5                                      }
- 461   4                              }
- 462   3                      }
- 463   2                      else
- 464   2                              sbtKey2_state = 0;
- 465   2      
- 466   2                      if (show_flag == 0)
- 467   2                      {
- 468   3                              sbtVib = 1;
- 469   3                              if (sbtVib == 0)
- 470   3                              {
- 471   4                                      tiptap = 1;
- 472   4                              }
- 473   3                      }
- 474   2              }
- 475   1      }
+ 432   3                              if (sbtKey2_state == 0)
+ 433   3                              {
+ 434   4                                      Delay10ms();
+ 435   4                                      if (sbtKey2 == 0)
+ 436   4                                      {
+ 437   5                                              light_dig = !light_dig;
+ 438   5                                              sbtKey2_state = 1;
+ 439   5                                      }
+ 440   4                              }
+ 441   3                      }
+ 442   2                      else
+ 443   2                              sbtKey2_state = 0;
+ 444   2      
+ 445   2                      if (show_flag == 0)
+ 446   2                      {
+ 447   3                              sbtVib = 1;
+ 448   3                              if (sbtVib == 0)
+ 449   3                              {
+ 450   4                                      tiptap = 1;
+ 451   4                              }
+ 452   3                      }
+ 453   2              }
+ 454   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   1352    ----
+   CODE SIZE        =   1372    ----
    CONSTANT SIZE    =      9    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =     89       9
+   DATA SIZE        =     88       9
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.

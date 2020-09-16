@@ -54,7 +54,6 @@ uint light_bai = 0;
 uint light_shi = 0;
 uint light_ge = 0;
 // 双击亮屏
-uchar i_;
 uint tiptap = 0;
 uint Vib_flap = 0;
 uint ret = 0;
@@ -188,29 +187,17 @@ void set_charge_DS1302()
 	DS1302Write(0x90, 0xa9); //  充电设置：允许充电，2个二极管，2K电
 	DS1302Write(0X8E, 0X80); //写保护置1
 }
-
-// void Delay(int n) //????
-// {
-// 	int x;
-// 	while (n--)
-// 	{
-// 		x = 60;
-// 		while (x--)
-// 			;
-// 	}
-// }
-void Delay500us() //@11.0592MHz
+void Delay100us()		//@11.0592MHz
 {
 	unsigned char i, j;
 
 	_nop_();
 	_nop_();
-	i = 3;
-	j = 35;
+	i = 2;
+	j = 15;
 	do
 	{
-		while (--j)
-			;
+		while (--j);
 	} while (--i);
 }
 void Delay10ms() //@11.0592MHz
@@ -235,14 +222,14 @@ void init()
 	P0M0 = 0XFF;
 	P0M1 = 0X00;
 
-	led_sel = 0;				 //选通数码管
-	TMOD = 0X11;				 //定时器0，工作方式1
-	EA = 1;						 //打开总中断
+	led_sel = 0; //选通数码管
+	TMOD = 0X11; //定时器0，工作方式1
+	EA = 1;		 //打开总中断
 	EADC = 1;
 	TH0 = (65535 - 40000) / 256; //设置定时初值
 	TL0 = (65535 - 40000) % 256;
 	TR0 = 1; //启动定时器
-	
+
 	TH1 = (65535 - 50000) / 256;
 	TL1 = (65535 - 50000) % 256;
 	TR1 = 1;
@@ -270,11 +257,31 @@ void time0() interrupt 1
 	InitADC_light(); //初始化光
 	EA = 1;
 }
-void time1() interrupt 3 {
+void time1() interrupt 3
+{
 	TH1 = (65535 - 50000) / 256;
 	TL1 = (65535 - 50000) % 256;
 	EA = 0;
-	
+	if (light >= Light_Level[light_choice] && light < Light_Level[light_choice])
+		light_choice = light_choice;
+	else if (light < Light_Level[light_choice])
+	{
+		light_choice -= 1;
+		if (light_choice <= 0)
+			light_choice = 0;
+		Led_Value += 4;
+		if (Led_Value > 44)
+			Led_Value = 44;
+	}
+	else
+	{
+		light_choice += 1;
+		if (light_choice >= 8)
+			light_choice = 8;
+		Led_Value -= 4;
+		if (Led_Value < 8)
+			Led_Value = 8;
+	}
 	EA = 1;
 }
 // AD中断
@@ -290,24 +297,6 @@ void adc_isr() interrupt 5 using 1
 		l = 0;
 		time_ = 0;
 		date_processlight();
-		if (light >= Light_Level[light_choice] && light < Light_Level[light_choice])
-			light_choice = light_choice;
-		else if (light < Light_Level[light_choice]){
-			light_choice -= 1;
-			if (light_choice <= 0)
-				light_choice = 0;
-			Led_Value += 4;
-			if (Led_Value > 44)
-				Led_Value = 44;
-		}
-		else {
-			light_choice += 1;
-			if (light_choice >= 8)
-				light_choice = 8;
-			Led_Value -= 4;
-			if (Led_Value < 8)
-				Led_Value = 8;
-		}
 	}
 	//处理光部分的数据
 	l++;
@@ -317,12 +306,6 @@ void adc_isr() interrupt 5 using 1
 	ADC_CONTR |= 0X08;	//转换完成后，ADC_START赋1
 	EA = 1;				//打开中断
 }
-// void weixuan(char i) //数码管位的选择
-// {
-// 	SEL2 = i / 4;
-// 	SEL1 = i % 4 / 2;
-// 	SEL0 = i % 2;
-// }
 void show_shumaguan()
 {
 	i++;
@@ -363,7 +346,7 @@ void show_shumaguan()
 			break;
 		}
 	}
-	else if (show_flag == 0 && tiptap == 1 && light_dig == 1)
+	else if (show_flag == 0 && tiptap == 1 && light_dig == 1 && i < 8)
 	{
 		ret += 1;
 		if (ret == 3000)
@@ -371,9 +354,8 @@ void show_shumaguan()
 			ret = 0;
 			tiptap = 0;
 		}
-		i_ = i % 8;
-		P2 = wei[i_];
-		switch (i_)
+		P2 = wei[i];
+		switch (i)
 		{
 		case 0:
 			P0 = duan[t.hour / 10];
@@ -398,23 +380,23 @@ void show_shumaguan()
 			break;
 		}
 	}
-	else if (light_dig == 0 && i < 3)	
+	else if (light_dig == 0 && i < 3)
 	{
 		P2 = wei[i];
 		switch (i)
 		{
-			case 0:
-				P0 = duan[light_bai];
-				break;
-			case 1:
-				P0 = duan[light_shi];
-				break;
-			case 2:
-				P0 = duan[light_ge];
-				break;
+		case 0:
+			P0 = duan[light_bai];
+			break;
+		case 1:
+			P0 = duan[light_shi];
+			break;
+		case 2:
+			P0 = duan[light_ge];
+			break;
 		}
 	}
-	Delay500us();
+	Delay100us();
 }
 
 void main()
