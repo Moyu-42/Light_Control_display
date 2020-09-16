@@ -1,4 +1,4 @@
-C51 COMPILER V9.51   DEMO                                                                  09/15/2020 23:16:58 PAGE 1   
+C51 COMPILER V9.51   DEMO                                                                  09/16/2020 10:24:28 PAGE 1   
 
 
 C51 COMPILER V9.51, COMPILATION OF MODULE DEMO
@@ -62,7 +62,7 @@ line level    source
   52          uint light_choice = 0;
   53          uint light_bai = 0;
   54          uint light_shi = 0;
-C51 COMPILER V9.51   DEMO                                                                  09/15/2020 23:16:58 PAGE 2   
+C51 COMPILER V9.51   DEMO                                                                  09/16/2020 10:24:28 PAGE 2   
 
   55          uint light_ge = 0;
   56          // 双击亮屏
@@ -126,7 +126,7 @@ line level    source
  114   2                      _nop_();
  115   2                      _nop_();
  116   2              }
-C51 COMPILER V9.51   DEMO                                                                  09/15/2020 23:16:58 PAGE 3   
+C51 COMPILER V9.51   DEMO                                                                  09/16/2020 10:24:28 PAGE 3   
 
  117   1              return dat; //返回读取出的数据
  118   1      }
@@ -190,7 +190,7 @@ line level    source
  176   1              DS1302Write(0X8E, 0X00); //写保护关
  177   1              DS1302Write(DS1302_second_write, sec);
  178   1              DS1302Write(DS1302_minutes_write, min);
-C51 COMPILER V9.51   DEMO                                                                  09/15/2020 23:16:58 PAGE 4   
+C51 COMPILER V9.51   DEMO                                                                  09/16/2020 10:24:28 PAGE 4   
 
  179   1              DS1302Write(DS1302_hour_write, hour);
  180   1              temp = DS1302Read(DS1302_second_read) & 0x7f;
@@ -221,8 +221,8 @@ line level    source
  205   1      
  206   1              _nop_();
  207   1              _nop_();
- 208   1              i = 6;
- 209   1              j = 93;
+ 208   1              i = 3;
+ 209   1              j = 35;
  210   1              do
  211   1              {
  212   2                      while (--j)
@@ -254,229 +254,253 @@ line level    source
  238   1              led_sel = 0;                             //选通数码管
  239   1              TMOD = 0X11;                             //定时器0，工作方式1
  240   1              EA = 1;                                          //打开总中断
-C51 COMPILER V9.51   DEMO                                                                  09/15/2020 23:16:58 PAGE 5   
+C51 COMPILER V9.51   DEMO                                                                  09/16/2020 10:24:28 PAGE 5   
 
  241   1              EADC = 1;
  242   1              TH0 = (65535 - 40000) / 256; //设置定时初值
  243   1              TL0 = (65535 - 40000) % 256;
  244   1              TR0 = 1; //启动定时器
- 245   1              ET0 = 1; //开启定时器中断
- 246   1      }
- 247          void InitADC_light() //初始化光ADC
- 248          {
- 249   1              ADC_RES = 0;
- 250   1              ADC_RESL = 0;
- 251   1              ADC_CONTR = 0x8c; //CHS=100选择P1^4作为A/D输入使用
- 252   1              CLK_DIV = 0x20;
- 253   1      }
- 254          void date_processlight()
- 255          {
- 256   1              light_bai = light % 1000 / 100;
- 257   1              light_shi = light % 100 / 10;
- 258   1              light_ge = light % 10;
- 259   1      }
- 260          void time0() interrupt 1
- 261          {
- 262   1              TH0 = (65535 - 40000) / 256; //设置定时初值
- 263   1              TL0 = (65535 - 40000) % 256;
- 264   1              EA = 0;
- 265   1              InitADC_light(); //初始化光
- 266   1              EA = 1;
- 267   1      }
- 268          // AD中断
- 269          void adc_isr() interrupt 5 using 1
- 270          {
- 271   1              time_++;
- 272   1              EA = 0; //关闭中断
- 273   1      
- 274   1              if (time_ > 2000) //取多次值求平均值减小误差
- 275   1              {
- 276   2                      light = (suml + l / 2) / l; //四舍五入
- 277   2                      suml = 0;
- 278   2                      l = 0;
- 279   2                      time_ = 0;
- 280   2                      date_processlight();
- 281   2              }
- 282   1              //处理光部分的数据
- 283   1              l++;
- 284   1              suml += ADC_RES * 256 + ADC_RESL; //求l次AD值的和
+ 245   1              
+ 246   1              TH1 = (65535 - 50000) / 256;
+ 247   1              TL1 = (65535 - 50000) % 256;
+ 248   1              TR1 = 1;
+ 249   1              ET0 = 1; //开启定时器中断
+ 250   1              ET1 = 1;
+ 251   1      }
+ 252          void InitADC_light() //初始化光ADC
+ 253          {
+ 254   1              ADC_RES = 0;
+ 255   1              ADC_RESL = 0;
+ 256   1              ADC_CONTR = 0x8c; //CHS=100选择P1^4作为A/D输入使用
+ 257   1              CLK_DIV = 0x20;
+ 258   1      }
+ 259          void date_processlight()
+ 260          {
+ 261   1              light_bai = light % 1000 / 100;
+ 262   1              light_shi = light % 100 / 10;
+ 263   1              light_ge = light % 10;
+ 264   1      }
+ 265          void time0() interrupt 1
+ 266          {
+ 267   1              TH0 = (65535 - 40000) / 256; //设置定时初值
+ 268   1              TL0 = (65535 - 40000) % 256;
+ 269   1              EA = 0;
+ 270   1              InitADC_light(); //初始化光
+ 271   1              EA = 1;
+ 272   1      }
+ 273          void time1() interrupt 3 {
+ 274   1              TH1 = (65535 - 50000) / 256;
+ 275   1              TL1 = (65535 - 50000) % 256;
+ 276   1              EA = 0;
+ 277   1              
+ 278   1              EA = 1;
+ 279   1      }
+ 280          // AD中断
+ 281          void adc_isr() interrupt 5 using 1
+ 282          {
+ 283   1              time_++;
+ 284   1              EA = 0; //关闭中断
  285   1      
- 286   1              ADC_CONTR &= ~0X10; //转换完成后，ADC_FLAG清零
- 287   1              ADC_CONTR |= 0X08;      //转换完成后，ADC_START赋1
- 288   1              EA = 1;                         //打开中断
- 289   1      }
- 290          // void weixuan(char i) //数码管位的选择
- 291          // {
- 292          //      SEL2 = i / 4;
- 293          //      SEL1 = i % 4 / 2;
- 294          //      SEL0 = i % 2;
- 295          // }
- 296          void show_shumaguan()
- 297          {
- 298   1              if (light >= Light_Level[light_choice] && light < Light_Level[light_choice])
- 299   1                      light_choice = light_choice;
- 300   1              else if (light < Light_Level[light_choice])
- 301   1                      light_choice -= 1;
- 302   1              else light_choice += 1;
-C51 COMPILER V9.51   DEMO                                                                  09/15/2020 23:16:58 PAGE 6   
+ 286   1              if (time_ > 2000) //取多次值求平均值减小误差
+ 287   1              {
+ 288   2                      light = (suml + l / 2) / l; //四舍五入
+ 289   2                      suml = 0;
+ 290   2                      l = 0;
+ 291   2                      time_ = 0;
+ 292   2                      date_processlight();
+ 293   2                      if (light >= Light_Level[light_choice] && light < Light_Level[light_choice])
+ 294   2                              light_choice = light_choice;
+ 295   2                      else if (light < Light_Level[light_choice]){
+ 296   3                              light_choice -= 1;
+ 297   3                              if (light_choice <= 0)
+ 298   3                                      light_choice = 0;
+ 299   3                              Led_Value += 4;
+ 300   3                              if (Led_Value > 44)
+ 301   3                                      Led_Value = 44;
+ 302   3                      }
+C51 COMPILER V9.51   DEMO                                                                  09/16/2020 10:24:28 PAGE 6   
 
- 303   1              Led_Value = 44 - 4 * light_choice;
- 304   1              i++;
- 305   1              if (++sec == 100)
- 306   1              {
- 307   2                      sec = 0;
- 308   2                      flag_100mS = 1;
- 309   2              }
- 310   1              if (i == Led_Value)
- 311   1                      i = 0;
- 312   1              led_sel = 0;
- 313   1              P0 = 0X00;
- 314   1              if (show_flag == 1 && i < 8 && light_dig == 1)
- 315   1              {
- 316   2                      P2 = wei[i];
- 317   2                      switch (i)
- 318   2                      {
- 319   3                      case 0:
- 320   3                              P0 = duan[t.hour / 10];
- 321   3                              break;
- 322   3                      case 1:
- 323   3                              P0 = duan[t.hour % 10];
- 324   3                              break;
- 325   3                      case 3:
- 326   3                              P0 = duan[t.minute / 10];
- 327   3                              break;
- 328   3                      case 4:
- 329   3                              P0 = duan[t.minute % 10];
- 330   3                              break;
- 331   3                      case 6:
- 332   3                              P0 = duan[t.second / 10];
- 333   3                              break;
- 334   3                      case 7:
- 335   3                              P0 = duan[t.second % 10];
- 336   3                              break;
- 337   3                      default:
- 338   3                              P0 = 0x40;
- 339   3                              break;
- 340   3                      }
- 341   2              }
- 342   1              else if (show_flag == 0 && tiptap == 1 && light_dig == 1)
- 343   1              {
- 344   2                      ret += 1;
- 345   2                      if (ret == 2000)
- 346   2                      {
- 347   3                              ret = 0;
- 348   3                              tiptap = 0;
- 349   3                      }
- 350   2                      i_ = i % 8;
- 351   2                      P2 = wei[i_];
- 352   2                      switch (i_)
- 353   2                      {
- 354   3                      case 0:
- 355   3                              P0 = duan[t.hour / 10];
- 356   3                              break;
- 357   3                      case 1:
- 358   3                              P0 = duan[t.hour % 10];
- 359   3                              break;
- 360   3                      case 3:
- 361   3                              P0 = duan[t.minute / 10];
- 362   3                              break;
- 363   3                      case 4:
- 364   3                              P0 = duan[t.minute % 10];
-C51 COMPILER V9.51   DEMO                                                                  09/15/2020 23:16:58 PAGE 7   
+ 303   2                      else {
+ 304   3                              light_choice += 1;
+ 305   3                              if (light_choice >= 8)
+ 306   3                                      light_choice = 8;
+ 307   3                              Led_Value -= 4;
+ 308   3                              if (Led_Value < 8)
+ 309   3                                      Led_Value = 8;
+ 310   3                      }
+ 311   2              }
+ 312   1              //处理光部分的数据
+ 313   1              l++;
+ 314   1              suml += ADC_RES * 256 + ADC_RESL; //求l次AD值的和
+ 315   1      
+ 316   1              ADC_CONTR &= ~0X10; //转换完成后，ADC_FLAG清零
+ 317   1              ADC_CONTR |= 0X08;      //转换完成后，ADC_START赋1
+ 318   1              EA = 1;                         //打开中断
+ 319   1      }
+ 320          // void weixuan(char i) //数码管位的选择
+ 321          // {
+ 322          //      SEL2 = i / 4;
+ 323          //      SEL1 = i % 4 / 2;
+ 324          //      SEL0 = i % 2;
+ 325          // }
+ 326          void show_shumaguan()
+ 327          {
+ 328   1              i++;
+ 329   1              if (++sec == 100)
+ 330   1              {
+ 331   2                      sec = 0;
+ 332   2                      flag_100mS = 1;
+ 333   2              }
+ 334   1              if (i == Led_Value)
+ 335   1                      i = 0;
+ 336   1              led_sel = 0;
+ 337   1              P0 = 0X00;
+ 338   1              if (show_flag == 1 && i < 8 && light_dig == 1)
+ 339   1              {
+ 340   2                      P2 = wei[i];
+ 341   2                      switch (i)
+ 342   2                      {
+ 343   3                      case 0:
+ 344   3                              P0 = duan[t.hour / 10];
+ 345   3                              break;
+ 346   3                      case 1:
+ 347   3                              P0 = duan[t.hour % 10];
+ 348   3                              break;
+ 349   3                      case 3:
+ 350   3                              P0 = duan[t.minute / 10];
+ 351   3                              break;
+ 352   3                      case 4:
+ 353   3                              P0 = duan[t.minute % 10];
+ 354   3                              break;
+ 355   3                      case 6:
+ 356   3                              P0 = duan[t.second / 10];
+ 357   3                              break;
+ 358   3                      case 7:
+ 359   3                              P0 = duan[t.second % 10];
+ 360   3                              break;
+ 361   3                      default:
+ 362   3                              P0 = 0x40;
+ 363   3                              break;
+ 364   3                      }
+C51 COMPILER V9.51   DEMO                                                                  09/16/2020 10:24:28 PAGE 7   
 
- 365   3                              break;
- 366   3                      case 6:
- 367   3                              P0 = duan[t.second / 10];
- 368   3                              break;
- 369   3                      case 7:
- 370   3                              P0 = duan[t.second % 10];
- 371   3                              break;
- 372   3                      default:
- 373   3                              P0 = 0x40;
- 374   3                              break;
- 375   3                      }
- 376   2              }
- 377   1              else if (light_dig == 0 && i < 3)
- 378   1              {
- 379   2                      P2 = wei[i];
- 380   2                      switch (i)
- 381   2                      {
- 382   3                              case 0:
- 383   3                                      P0 = duan[light_bai];
- 384   3                                      break;
- 385   3                              case 1:
- 386   3                                      P0 = duan[light_shi];
- 387   3                                      break;
- 388   3                              case 2:
- 389   3                                      P0 = duan[light_ge];
- 390   3                                      break;
- 391   3                      }
- 392   2              }
- 393   1              Delay500us();
- 394   1      }
- 395          
- 396          void main()
- 397          {
- 398   1              init();
- 399   1              if (DS1302Read(DS1302_second_read) & 0X80)
- 400   1                      Init_DS1302();
- 401   1              set_charge_DS1302();
- 402   1              while (1)
- 403   1              {
- 404   2                      show_shumaguan();
- 405   2      
- 406   2                      if (flag_100mS == 1)
- 407   2                      {
- 408   3                              t = GetDA1302();
- 409   3                              flag_100mS = 0;
- 410   3                      }
- 411   2      
- 412   2                      if (sbtKey1 == 0)
- 413   2                      {
- 414   3                              if (sbtKey1_state == 0)
- 415   3                              {
- 416   4                                      Delay10ms();
- 417   4                                      if (sbtKey1 == 0)
- 418   4                                      {
- 419   5                                              show_flag = !show_flag;
- 420   5                                              sbtKey1_state = 1;
- 421   5                                      }
- 422   4                              }
- 423   3                      }
- 424   2                      else
- 425   2                              sbtKey1_state = 0;
- 426   2      
-C51 COMPILER V9.51   DEMO                                                                  09/15/2020 23:16:58 PAGE 8   
+ 365   2              }
+ 366   1              else if (show_flag == 0 && tiptap == 1 && light_dig == 1)
+ 367   1              {
+ 368   2                      ret += 1;
+ 369   2                      if (ret == 3000)
+ 370   2                      {
+ 371   3                              ret = 0;
+ 372   3                              tiptap = 0;
+ 373   3                      }
+ 374   2                      i_ = i % 8;
+ 375   2                      P2 = wei[i_];
+ 376   2                      switch (i_)
+ 377   2                      {
+ 378   3                      case 0:
+ 379   3                              P0 = duan[t.hour / 10];
+ 380   3                              break;
+ 381   3                      case 1:
+ 382   3                              P0 = duan[t.hour % 10];
+ 383   3                              break;
+ 384   3                      case 3:
+ 385   3                              P0 = duan[t.minute / 10];
+ 386   3                              break;
+ 387   3                      case 4:
+ 388   3                              P0 = duan[t.minute % 10];
+ 389   3                              break;
+ 390   3                      case 6:
+ 391   3                              P0 = duan[t.second / 10];
+ 392   3                              break;
+ 393   3                      case 7:
+ 394   3                              P0 = duan[t.second % 10];
+ 395   3                              break;
+ 396   3                      default:
+ 397   3                              P0 = 0x40;
+ 398   3                              break;
+ 399   3                      }
+ 400   2              }
+ 401   1              else if (light_dig == 0 && i < 3)       
+ 402   1              {
+ 403   2                      P2 = wei[i];
+ 404   2                      switch (i)
+ 405   2                      {
+ 406   3                              case 0:
+ 407   3                                      P0 = duan[light_bai];
+ 408   3                                      break;
+ 409   3                              case 1:
+ 410   3                                      P0 = duan[light_shi];
+ 411   3                                      break;
+ 412   3                              case 2:
+ 413   3                                      P0 = duan[light_ge];
+ 414   3                                      break;
+ 415   3                      }
+ 416   2              }
+ 417   1              Delay500us();
+ 418   1      }
+ 419          
+ 420          void main()
+ 421          {
+ 422   1              init();
+ 423   1              if (DS1302Read(DS1302_second_read) & 0X80)
+ 424   1                      Init_DS1302();
+ 425   1              set_charge_DS1302();
+ 426   1              while (1)
+C51 COMPILER V9.51   DEMO                                                                  09/16/2020 10:24:28 PAGE 8   
 
- 427   2                      if (sbtKey2 == 0)
- 428   2                      {
- 429   3                              if (sbtKey2_state == 0)
- 430   3                              {
- 431   4                                      Delay10ms();
- 432   4                                      if (sbtKey2 == 0)
- 433   4                                      {
- 434   5                                              light_dig = !light_dig;
- 435   5                                              sbtKey2_state = 1;
- 436   5                                      }
- 437   4                              }
- 438   3                      }
- 439   2                      else
- 440   2                              sbtKey2_state = 0;
- 441   2      
- 442   2                      if (show_flag == 0)
- 443   2                      {
- 444   3                              sbtVib = 1;
- 445   3                              if (sbtVib == 0)
- 446   3                              {
- 447   4                                      tiptap = 1;
- 448   4                              }
- 449   3                      }
- 450   2              }
- 451   1      }
+ 427   1              {
+ 428   2                      show_shumaguan();
+ 429   2      
+ 430   2                      if (flag_100mS == 1)
+ 431   2                      {
+ 432   3                              t = GetDA1302();
+ 433   3                              flag_100mS = 0;
+ 434   3                      }
+ 435   2      
+ 436   2                      if (sbtKey1 == 0)
+ 437   2                      {
+ 438   3                              if (sbtKey1_state == 0)
+ 439   3                              {
+ 440   4                                      Delay10ms();
+ 441   4                                      if (sbtKey1 == 0)
+ 442   4                                      {
+ 443   5                                              show_flag = !show_flag;
+ 444   5                                              sbtKey1_state = 1;
+ 445   5                                      }
+ 446   4                              }
+ 447   3                      }
+ 448   2                      else
+ 449   2                              sbtKey1_state = 0;
+ 450   2      
+ 451   2                      if (sbtKey2 == 0)
+ 452   2                      {
+ 453   3                              if (sbtKey2_state == 0)
+ 454   3                              {
+ 455   4                                      Delay10ms();
+ 456   4                                      if (sbtKey2 == 0)
+ 457   4                                      {
+ 458   5                                              light_dig = !light_dig;
+ 459   5                                              sbtKey2_state = 1;
+ 460   5                                      }
+ 461   4                              }
+ 462   3                      }
+ 463   2                      else
+ 464   2                              sbtKey2_state = 0;
+ 465   2      
+ 466   2                      if (show_flag == 0)
+ 467   2                      {
+ 468   3                              sbtVib = 1;
+ 469   3                              if (sbtVib == 0)
+ 470   3                              {
+ 471   4                                      tiptap = 1;
+ 472   4                              }
+ 473   3                      }
+ 474   2              }
+ 475   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   1265    ----
+   CODE SIZE        =   1352    ----
    CONSTANT SIZE    =      9    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----

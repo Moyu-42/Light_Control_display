@@ -205,8 +205,8 @@ void Delay500us() //@11.0592MHz
 
 	_nop_();
 	_nop_();
-	i = 6;
-	j = 93;
+	i = 3;
+	j = 35;
 	do
 	{
 		while (--j)
@@ -242,7 +242,12 @@ void init()
 	TH0 = (65535 - 40000) / 256; //设置定时初值
 	TL0 = (65535 - 40000) % 256;
 	TR0 = 1; //启动定时器
+	
+	TH1 = (65535 - 50000) / 256;
+	TL1 = (65535 - 50000) % 256;
+	TR1 = 1;
 	ET0 = 1; //开启定时器中断
+	ET1 = 1;
 }
 void InitADC_light() //初始化光ADC
 {
@@ -265,6 +270,13 @@ void time0() interrupt 1
 	InitADC_light(); //初始化光
 	EA = 1;
 }
+void time1() interrupt 3 {
+	TH1 = (65535 - 50000) / 256;
+	TL1 = (65535 - 50000) % 256;
+	EA = 0;
+	
+	EA = 1;
+}
 // AD中断
 void adc_isr() interrupt 5 using 1
 {
@@ -278,6 +290,24 @@ void adc_isr() interrupt 5 using 1
 		l = 0;
 		time_ = 0;
 		date_processlight();
+		if (light >= Light_Level[light_choice] && light < Light_Level[light_choice])
+			light_choice = light_choice;
+		else if (light < Light_Level[light_choice]){
+			light_choice -= 1;
+			if (light_choice <= 0)
+				light_choice = 0;
+			Led_Value += 4;
+			if (Led_Value > 44)
+				Led_Value = 44;
+		}
+		else {
+			light_choice += 1;
+			if (light_choice >= 8)
+				light_choice = 8;
+			Led_Value -= 4;
+			if (Led_Value < 8)
+				Led_Value = 8;
+		}
 	}
 	//处理光部分的数据
 	l++;
@@ -295,12 +325,6 @@ void adc_isr() interrupt 5 using 1
 // }
 void show_shumaguan()
 {
-	if (light >= Light_Level[light_choice] && light < Light_Level[light_choice])
-		light_choice = light_choice;
-	else if (light < Light_Level[light_choice])
-		light_choice -= 1;
-	else light_choice += 1;
-	Led_Value = 44 - 4 * light_choice;
 	i++;
 	if (++sec == 100)
 	{
@@ -342,7 +366,7 @@ void show_shumaguan()
 	else if (show_flag == 0 && tiptap == 1 && light_dig == 1)
 	{
 		ret += 1;
-		if (ret == 2000)
+		if (ret == 3000)
 		{
 			ret = 0;
 			tiptap = 0;
@@ -374,7 +398,7 @@ void show_shumaguan()
 			break;
 		}
 	}
-	else if (light_dig == 0 && i < 3)
+	else if (light_dig == 0 && i < 3)	
 	{
 		P2 = wei[i];
 		switch (i)
