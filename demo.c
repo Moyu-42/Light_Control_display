@@ -42,8 +42,8 @@ uint show_flag = 1; // 是否显示数码管
 uint light_dig = 1;
 uint sbtKey1_state = 1;										  // K1消抖
 uint sbtKey2_state = 1;										  // K2消抖
-uint Led_Value = 8;											  // 数码管显示位数 8 ~ 44 4位一档 共9档
-uint Light_Level[] = {10, 20, 30, 40, 60, 80, 120, 160, 200}; // 不同光照强度阙值
+uint Led_Value = 8;											  // 数码管显示位数 8 ~ 92 4位一档 共9档
+uint Light_Level[] = {20, 40, 60, 80, 100, 120, 160, 180, 200, 220, 240, 260, 280, 300}; // 不同光照强度阙值
 // 光照测试部分变量
 uint l = 0;		//执行光的次数
 uint time_ = 0; //延时
@@ -257,31 +257,22 @@ void time0() interrupt 1
 	InitADC_light(); //初始化光
 	EA = 1;
 }
+void Light_Control() {
+	int targ;
+	if (light > 241) light = 241;
+	targ = light / 10;
+	targ /= 3;
+	targ *= 8;
+	if (Led_Value == 72 - targ) Led_Value = Led_Value;
+	else if (Led_Value > 72 - targ) Led_Value -= 8;
+	else Led_Value += 8;
+}
 void time1() interrupt 3
 {
 	TH1 = (65535 - 50000) / 256;
 	TL1 = (65535 - 50000) % 256;
 	EA = 0;
-	if (light >= Light_Level[light_choice] && light < Light_Level[light_choice])
-		light_choice = light_choice;
-	else if (light < Light_Level[light_choice])
-	{
-		light_choice -= 1;
-		if (light_choice <= 0)
-			light_choice = 0;
-		Led_Value += 4;
-		if (Led_Value > 44)
-			Led_Value = 44;
-	}
-	else
-	{
-		light_choice += 1;
-		if (light_choice >= 8)
-			light_choice = 8;
-		Led_Value -= 4;
-		if (Led_Value < 8)
-			Led_Value = 8;
-	}
+	Light_Control();
 	EA = 1;
 }
 // AD中断
@@ -349,7 +340,7 @@ void show_shumaguan()
 	else if (show_flag == 0 && tiptap == 1 && light_dig == 1 && i < 8)
 	{
 		ret += 1;
-		if (ret == 3000)
+		if (ret == 2000)
 		{
 			ret = 0;
 			tiptap = 0;
