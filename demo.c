@@ -47,6 +47,7 @@ uint Light_Level[] = {20, 40, 60, 80, 100, 120, 160, 180, 200, 220, 240, 260, 28
 // 光照测试部分变量
 uint l = 0;		//执行光的次数
 uint time_ = 0; //延时
+uint time__ = 0;
 ulint suml = 0; //光AD值得总和
 uint light = 0; //光
 uint light_choice = 0;
@@ -272,7 +273,11 @@ void time1() interrupt 3
 	TH1 = 0xD4;
 	TL1 = 0xCD;
 	EA = 0;
-	Light_Control();
+	time__ += 1;
+	if (time__ > 30) {
+		time__ = 0;
+		Light_Control();
+	}
 	EA = 1;
 }
 // AD中断
@@ -373,6 +378,7 @@ void show_shumaguan()
 	}
 	else if (light_dig == 0 && i < 3)
 	{
+		show_flag = 1;
 		P2 = wei[i];
 		switch (i)
 		{
@@ -396,6 +402,9 @@ void main()
 	if (DS1302Read(DS1302_second_read) & 0X80)
 		Init_DS1302();
 	set_charge_DS1302();
+	while(light == 0);
+	if (light > 241) light = 241;
+	Led_Value = 72 - light / 10 / 3 * 8;
 	while (1)
 	{
 		show_shumaguan();
