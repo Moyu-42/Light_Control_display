@@ -49,7 +49,7 @@ uint l = 0;		//执行光的次数
 uint time_ = 0; //延时
 ulint suml = 0; //光AD值得总和
 uint light = 0; //光
-
+uint light_choice = 0;
 uint light_bai = 0;
 uint light_shi = 0;
 uint light_ge = 0;
@@ -189,16 +189,16 @@ void set_charge_DS1302()
 	DS1302Write(0X8E, 0X80); //写保护置1
 }
 
-void Delay(int n) //????
-{
-	int x;
-	while (n--)
-	{
-		x = 60;
-		while (x--)
-			;
-	}
-}
+// void Delay(int n) //????
+// {
+// 	int x;
+// 	while (n--)
+// 	{
+// 		x = 60;
+// 		while (x--)
+// 			;
+// 	}
+// }
 void Delay500us() //@11.0592MHz
 {
 	unsigned char i, j;
@@ -287,14 +287,20 @@ void adc_isr() interrupt 5 using 1
 	ADC_CONTR |= 0X08;	//转换完成后，ADC_START赋1
 	EA = 1;				//打开中断
 }
-void weixuan(char i) //数码管位的选择
-{
-	SEL2 = i / 4;
-	SEL1 = i % 4 / 2;
-	SEL0 = i % 2;
-}
+// void weixuan(char i) //数码管位的选择
+// {
+// 	SEL2 = i / 4;
+// 	SEL1 = i % 4 / 2;
+// 	SEL0 = i % 2;
+// }
 void show_shumaguan()
 {
+	if (light >= Light_Level[light_choice] && light < Light_Level[light_choice])
+		light_choice = light_choice;
+	else if (light < Light_Level[light_choice])
+		light_choice -= 1;
+	else light_choice += 1;
+	Led_Value = 44 - 4 * light_choice;
 	i++;
 	if (++sec == 100)
 	{
@@ -368,21 +374,21 @@ void show_shumaguan()
 			break;
 		}
 	}
-	else if (light_dig == 0)
+	else if (light_dig == 0 && i < 3)
 	{
-		weixuan(0);
-		P0 = duan[light_bai];
-		Delay(10);
-
-		P0 = 0x00;
-		weixuan(1);
-		P0 = duan[light_shi];
-		Delay(10);
-
-		P0 = 0x00;
-		weixuan(2);
-		P0 = duan[light_ge];
-		Delay(10);
+		P2 = wei[i];
+		switch (i)
+		{
+			case 0:
+				P0 = duan[light_bai];
+				break;
+			case 1:
+				P0 = duan[light_shi];
+				break;
+			case 2:
+				P0 = duan[light_ge];
+				break;
+		}
 	}
 	Delay500us();
 }
